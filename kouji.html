@@ -193,18 +193,18 @@
       <!-- 入力フォーム -->
       <div class="card">
         <h2>工事情報を登録する</h2>
-        <form>
+        <form id="register-form">
           <p>
             <span class="form-label">工事名：</span>
-            <input type="text" name="kouji_name" placeholder="例：〇〇ビル新築工事">
+            <input type="text" id="kouji_name" name="kouji_name" placeholder="例：〇〇ビル新築工事">
           </p>
           <p>
             <span class="form-label">担当者：</span>
-            <input type="text" name="tanto_name" placeholder="例：山田太郎">
+            <input type="text" id="tanto_name" name="tanto_name" placeholder="例：山田太郎">
           </p>
           <p>
             <span class="form-label">状態：</span>
-            <select name="status">
+            <select id="status" name="status">
               <option value="進行中">進行中</option>
               <option value="完了">完了</option>
               <option value="未着手">未着手</option>
@@ -229,7 +229,7 @@
                 <th>状態</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="kouji-list">
               <tr>
                 <td>001</td>
                 <td>〇〇ビル新築工事</td>
@@ -247,5 +247,49 @@
         </div>
       </div>
     </div>
+
+    <script>
+      const form = document.getElementById("register-form");
+      const koujiList = document.getElementById("kouji-list");
+
+      const statusClassMap = {
+        "進行中": "status-progress",
+        "完了": "status-done",
+        "未着手": "status-pending",
+      };
+
+      function getNextKoujiNumber() {
+        const count = koujiList.querySelectorAll("tr").length;
+        return String(count + 1).padStart(3, "0");
+      }
+
+      function createStatusBadge(status) {
+        const badge = document.createElement("span");
+        badge.className = "status " + (statusClassMap[status] || "status-pending");
+        badge.textContent = status;
+        return badge;
+      }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const koujiName = document.getElementById("kouji_name").value.trim();
+        const tantoName = document.getElementById("tanto_name").value.trim();
+        const status = document.getElementById("status").value;
+
+        const row = document.createElement("tr");
+        row.innerHTML =
+          "<td></td><td></td><td></td><td></td>";
+
+        const cells = row.querySelectorAll("td");
+        cells[0].textContent = getNextKoujiNumber();
+        cells[1].textContent = koujiName;
+        cells[2].textContent = tantoName;
+        cells[3].appendChild(createStatusBadge(status));
+
+        koujiList.appendChild(row);
+        form.reset();
+      });
+    </script>
   </body>
 </html>
