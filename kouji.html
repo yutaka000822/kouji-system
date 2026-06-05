@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>工事情報システム</title>
+  </head>
+  <body>
+    <h1>工事情報システム</h1>
+
+    <!-- 入力フォーム -->
+    <h2>工事情報を登録する</h2>
+    <form>
+      <p>
+        工事名：
+        <input type="text" name="kouji_name" placeholder="例：〇〇ビル新築工事">
+      </p>
+      <p>
+        担当者：
+        <input type="text" name="tanto_name" placeholder="例：山田太郎">
+      </p>
+      <p>
+        状態：
+        <select name="status">
+          <option value="進行中">進行中</option>
+          <option value="完了">完了</option>
+          <option value="未着手">未着手</option>
+        </select>
+      </p>
+      <p>
+        <button type="submit">登録する</button>
+      </p>
+    </form>
+
+    <!-- 一覧表示 -->
+    <h2>工事情報一覧</h2>
+    <table border="1">
+      <tr>
+        <th>工事番号</th>
+        <th>工事名</th>
+        <th>担当者</th>
+        <th>状態</th>
+      </tr>
+      <tr>
+        <td>001</td>
+        <td>〇〇ビル新築工事</td>
+        <td>山田太郎</td>
+        <td>進行中</td>
+      </tr>
+      <tr>
+        <td>002</td>
+        <td>△△道路補修工事</td>
+        <td>鈴木花子</td>
+        <td>完了</td>
+      </tr>
+    </table>
+
+  </body>
+</html>
