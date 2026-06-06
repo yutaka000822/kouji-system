@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工事情報システム</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: "Segoe UI", "Hiragino Sans", Meiryo, sans-serif;
+        background: linear-gradient(135deg, #e8f4fc 0%, #d4e8f7 50%, #c5dff0 100%);
+        min-height: 100vh;
+        color: #2c3e50;
+        line-height: 1.6;
+        padding: 2rem 1rem;
+      }
+      .container { max-width: 900px; margin: 0 auto; }
+      h1 {
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a5276;
+        margin-bottom: 2rem;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(26,82,118,0.12);
+        padding: 1.75rem 2rem;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a5276;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #3498db;
+      }
+      form p {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .form-label {
+        min-width: 5rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #34495e;
+      }
+      input[type="text"], select {
+        flex: 1;
+        max-width: 320px;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid #bdc3c7;
+        border-radius: 8px;
+        font-size: 0.95rem;
+      }
+      input[type="text"]:focus, select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+      }
+      .form-actions { margin-top: 1.5rem; }
+      button[type="submit"] {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: #ffffff;
+        border: none;
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(52,152,219,0.35);
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+      button[type="submit"]:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(52,152,219,0.45);
+      }
+      .table-wrapper {
+        overflow-x: auto;
+        border-radius: 10px;
+        border: 1px solid #dce4ec;
+      }
+      table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+      thead {
+        background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%);
+        color: #ffffff;
+      }
+      th { padding: 0.85rem 1rem; text-align: left; font-weight: 600; }
+      td { padding: 0.75rem 1rem; border-bottom: 1px solid #ecf0f1; }
+      tbody tr:nth-child(even) { background-color: #f8fbfd; }
+      tbody tr:hover { background-color: #e8f4fc; }
+      tbody tr:last-child td { border-bottom: none; }
+      .status {
+        display: inline-block;
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .status-progress { background: #fef9e7; color: #b7950b; }
+      .status-done { background: #eafaf1; color: #1e8449; }
+      .status-pending { background: #f4f6f7; color: #566573; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>工事情報システム</h1>
+      <div class="card">
+        <h2>工事情報を登録する</h2>
+        <form id="register-form">
+          <p>
+            <span class="form-label">工事名：</span>
+            <input type="text" id="kouji_name" placeholder="例：〇〇ビル新築工事">
+          </p>
+          <p>
+            <span class="form-label">担当者：</span>
+            <input type="text" id="tanto_name" placeholder="例：山田太郎">
+          </p>
+          <p>
+            <span class="form-label">状態：</span>
+            <select id="status">
+              <option value="進行中">進行中</option>
+              <option value="完了">完了</option>
+              <option value="未着手">未着手</option>
+            </select>
+          </p>
+          <p class="form-actions">
+            <button type="submit">登録する</button>
+          </p>
+        </form>
+      </div>
+      <div class="card">
+        <h2>工事情報一覧</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>工事番号</th>
+                <th>工事名</th>
+                <th>担当者</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody id="kouji-list"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script>
+      const form = document.getElementById('register-form');
+      const koujiList = document.getElementById('kouji-list');
+      const statusClassMap = {
+        '進行中': 'status-progress',
+        '完了': 'status-done',
+        '未着手': 'status-pending',
+      };
+
+      function createStatusBadge(status) {
+        const badge = document.createElement('span');
+        badge.className = 'status ' + (statusClassMap[status] || 'status-pending');
+        badge.textContent = status;
+        return badge;
+      }
+
+      async function loadKoujiList() {
+        const res = await fetch('/api/kouji');
+        const data = await res.json();
+        koujiList.innerHTML = '';
+        data.forEach(function(item) {
+          const row = document.createElement('tr');
+          const idTd = document.createElement('td');
+          idTd.textContent = String(item.id).padStart(3, '0');
+          const nameTd = document.createElement('td');
+          nameTd.textContent = item.kouji_name;
+          const tantoTd = document.createElement('td');
+          tantoTd.textContent = item.tanto_name;
+          const statusTd = document.createElement('td');
+          statusTd.appendChild(createStatusBadge(item.status));
+          row.appendChild(idTd);
+          row.appendChild(nameTd);
+          row.appendChild(tantoTd);
+          row.appendChild(statusTd);
+          koujiList.appendChild(row);
+        });
+      }
+
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const koujiName = document.getElementById('kouji_name').value.trim();
+        const tantoName = document.getElementById('tanto_name').value.trim();
+        const status = document.getElementById('status').value;
+        await fetch('/api/kouji', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            kouji_name: koujiName,
+            tanto_name: tantoName,
+            status: status
+          })
+        });
+        form.reset();
+        loadKoujiList();
+      });
+
+      loadKoujiList();
+    </script>
+  </body>
+</html>
